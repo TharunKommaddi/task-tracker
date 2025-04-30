@@ -1084,7 +1084,7 @@
         async function saveTasksToGitHub() {
             const owner = localStorage.getItem('gh_owner');
             const repo = localStorage.getItem('gh_repo');
-            const token = localStorage.getItem(ghTokenKey');
+            const token = localStorage.getItem(ghTokenKey);
             
             if (!owner || !repo || !token || !navigator.onLine) {
                 return false;
