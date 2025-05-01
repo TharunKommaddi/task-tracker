@@ -285,6 +285,46 @@
             align-items: center;
             font-size: 0.85rem;
             color: var(--text-secondary);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .task-meta > div {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .task-dates {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .task-due-date {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .date-warning {
+            color: var(--warning);
+        }
+
+        .date-danger {
+            color: var(--danger);
+        }
+
+        .date-success {
+            color: var(--success);
+        }
+
+        .task-dates.overdue {
+            color: var(--danger);
         }
 
         .task-actions {
@@ -577,6 +617,40 @@
             color: var(--danger);
         }
 
+        .date-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background-color: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar.warning {
+            background-color: var(--warning);
+        }
+
+        .progress-bar.danger {
+            background-color: var(--danger);
+        }
+
+        .progress-bar.success {
+            background-color: var(--success);
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8rem;
@@ -620,6 +694,10 @@
 
             .task-card {
                 min-height: 180px;
+            }
+
+            .date-inputs {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -744,6 +822,19 @@
                         <option value="Jomy Joseph">Jomy Joseph</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Task Duration</label>
+                    <div class="date-inputs">
+                        <div>
+                            <label for="startDate">Start Date</label>
+                            <input type="date" id="startDate" class="form-control" required>
+                        </div>
+                        <div>
+                            <label for="dueDate">Due Date</label>
+                            <input type="date" id="dueDate" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
                 <div class="button-group">
                     <button type="button" class="btn-cancel" id="cancelTask">Cancel</button>
                     <button type="submit" id="saveTaskBtn">Save Task</button>
@@ -761,7 +852,7 @@
             
             <div class="form-group">
                 <label for="repoOwnerInput">GitHub Username:</label>
-                <input type="text" id="repoOwnerInput" placeholder="e.g., tharunkommaddi" class="form-control">
+                <input type="text" id="repoOwnerInput" placeholder="e.g., TharunKommaddi" class="form-control">
             </div>
             
             <div class="form-group">
@@ -783,6 +874,22 @@
         </div>
     </div>
 
+    <!-- Confirm Delete Modal -->
+    <div class="modal" id="confirmDeleteModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeConfirmModal">&times;</span>
+            <h2>Confirm Deletion</h2>
+            <p style="margin: 20px 0;">Are you sure you want to delete this task? This action cannot be undone.</p>
+            <div class="button-group">
+                <button id="cancelDeleteBtn" class="btn-cancel">Cancel</button>
+                <button id="confirmDeleteBtn" style="background-color: var(--danger);">
+                    <i class="fas fa-trash"></i>
+                    Delete Permanently
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global variables
         let tasks = [];
@@ -792,6 +899,7 @@
         const ghTokenKey = 'gh_token';
         let currentFilter = 'all';
         let isDeleting = false;
+        let taskToDelete = null;
         
         // DOM elements
         const taskGrid = document.getElementById('taskGrid');
@@ -813,9 +921,16 @@
         const cancelSetupBtn = document.getElementById('cancelSetupBtn');
         const testConnectionBtn = document.getElementById('testConnectionBtn');
         const saveSetupBtn = document.getElementById('saveSetupBtn');
+        const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        const closeConfirmModal = document.getElementById('closeConfirmModal');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         
         // Initialize the app
         function init() {
+            // Set today as the default for date inputs
+            setDefaultDates();
+            
             // Set up theme
             initTheme();
             
@@ -847,9 +962,29 @@
             setupEventListeners();
             
             // Check online status
+            // Check online status
             updateOnlineStatus();
             window.addEventListener('online', updateOnlineStatus);
             window.addEventListener('offline', updateOnlineStatus);
+        }
+        
+        // Set default dates for new tasks
+        function setDefaultDates() {
+            const today = new Date();
+            const nextWeek = new Date();
+            nextWeek.setDate(today.getDate() + 7);
+            
+            const startDateInput = document.getElementById('startDate');
+            const dueDateInput = document.getElementById('dueDate');
+            
+            if (startDateInput && dueDateInput) {
+                startDateInput.valueAsDate = today;
+                dueDateInput.valueAsDate = nextWeek;
+                
+                // Set min dates
+                startDateInput.min = today.toISOString().split('T')[0];
+                dueDateInput.min = today.toISOString().split('T')[0];
+            }
         }
         
         // Initialize theme
@@ -884,6 +1019,11 @@
             cancelTask.addEventListener('click', closeTaskModal);
             taskForm.addEventListener('submit', saveTask);
             
+            // Delete confirmation
+            closeConfirmModal.addEventListener('click', closeConfirmDeleteModal);
+            cancelDeleteBtn.addEventListener('click', closeConfirmDeleteModal);
+            confirmDeleteBtn.addEventListener('click', proceedWithDelete);
+            
             // Search and filter
             searchInput.addEventListener('input', filterTasks);
             filterButtons.forEach(btn => {
@@ -895,6 +1035,14 @@
                 });
             });
             
+            // Date validation
+            const startDateInput = document.getElementById('startDate');
+            const dueDateInput = document.getElementById('dueDate');
+            if (startDateInput && dueDateInput) {
+                startDateInput.addEventListener('change', validateDates);
+                dueDateInput.addEventListener('change', validateDates);
+            }
+            
             // GitHub sync
             syncGitHubBtn.addEventListener('click', openGitHubSetupModal);
             closeGitHubModal.addEventListener('click', closeGitHubSetupModal);
@@ -904,6 +1052,23 @@
             
             // Theme toggle
             themeToggle.addEventListener('click', toggleTheme);
+        }
+        
+        // Validate date inputs
+        function validateDates() {
+            const startDateInput = document.getElementById('startDate');
+            const dueDateInput = document.getElementById('dueDate');
+            
+            if (startDateInput.value && dueDateInput.value) {
+                const startDate = new Date(startDateInput.value);
+                const dueDate = new Date(dueDateInput.value);
+                
+                if (dueDate < startDate) {
+                    dueDateInput.setCustomValidity('Due date must be after start date');
+                } else {
+                    dueDateInput.setCustomValidity('');
+                }
+            }
         }
         
         // Update online status
@@ -1092,9 +1257,8 @@
             
             try {
                 // First check if the file exists and get its SHA
-                let sha = localStorage.getItem('tasksSHA');
-                let method = 'PUT';
-                let url = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
+                const sha = localStorage.getItem('tasksSHA');
+                const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`;
                 
                 // If we're deleting all tasks and the file exists, delete it
                 if (tasks.length === 0 && sha) {
@@ -1135,7 +1299,7 @@
                 
                 // Send the request
                 const response = await fetch(url, {
-                    method: method,
+                    method: 'PUT',
                     headers: {
                         'Authorization': `token ${token}`,
                         'Content-Type': 'application/json'
@@ -1207,18 +1371,25 @@
                 taskMap[task.id] = task;
             });
             
-            // Create a set of task IDs to track deletions
-            const taskIds = new Set(tasks.map(task => task.id));
+            // Create a set of task IDs to track which local tasks we have
+            const localTaskIds = new Set(tasks.map(task => task.id));
             
-            // Merge remote tasks
+            // Processed remote IDs
+            const processedRemoteIds = new Set();
+            
+            // Process remote tasks
             remoteTasks.forEach(remoteTask => {
+                // Track that we've seen this remote task
+                processedRemoteIds.add(remoteTask.id);
+                
                 const localTask = taskMap[remoteTask.id];
                 
                 if (!localTask) {
                     // Task doesn't exist locally, add it
                     tasks.push(remoteTask);
                 } else {
-                    // Task exists, use the one with the latest updatedAt
+                    // Task exists both locally and remotely
+                    // Compare update timestamps to determine which is newer
                     const remoteDate = new Date(remoteTask.updatedAt);
                     const localDate = new Date(localTask.updatedAt);
                     
@@ -1227,24 +1398,21 @@
                         Object.assign(localTask, remoteTask);
                     }
                 }
-                
-                // Mark this task as seen
-                taskIds.delete(remoteTask.id);
             });
             
-            // If isDeleting flag is not set, we're in a normal sync
-            // and should keep local tasks not in remote
-            if (!isDeleting) {
-                return;
+            // Handle deletions
+            if (isDeleting) {
+                // We are in delete mode, so keep only tasks that exist remotely
+                // (except for the task we're currently deleting)
+                tasks = tasks.filter(task => 
+                    processedRemoteIds.has(task.id) || 
+                    (taskToDelete && task.id === taskToDelete)
+                );
+                
+                // Reset deletion mode
+                isDeleting = false;
+                taskToDelete = null;
             }
-            
-            // Remove any local tasks that were deleted remotely
-            if (taskIds.size > 0) {
-                tasks = tasks.filter(task => !taskIds.has(task.id));
-            }
-            
-            // Reset the deletion flag
-            isDeleting = false;
         }
         
         // Render tasks
@@ -1253,8 +1421,11 @@
             
             // Filter tasks based on search term and current filter
             const filteredTasks = tasks.filter(task => {
-                const matchesSearch = task.title.toLowerCase().includes(searchTerm) || 
-                                     task.description.toLowerCase().includes(searchTerm);
+                const matchesSearch = 
+                    task.title.toLowerCase().includes(searchTerm) || 
+                    task.description.toLowerCase().includes(searchTerm) ||
+                    task.assignee.toLowerCase().includes(searchTerm);
+                    
                 const matchesFilter = currentFilter === 'all' || task.status === currentFilter;
                 return matchesSearch && matchesFilter;
             });
@@ -1266,6 +1437,20 @@
                 renderEmptyState();
                 return;
             }
+            
+            // Sort tasks: Not Started first, then In Progress, then Completed
+            // Within each status, sort by due date (closest first)
+            filteredTasks.sort((a, b) => {
+                // First by status
+                const statusOrder = { 'not-started': 0, 'in-progress': 1, 'completed': 2 };
+                const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+                if (statusDiff !== 0) return statusDiff;
+                
+                // Then by due date
+                const aDate = new Date(a.dueDate || a.createdAt);
+                const bDate = new Date(b.dueDate || b.createdAt);
+                return aDate - bDate;
+            });
             
             // Create task cards
             filteredTasks.forEach(task => {
@@ -1317,6 +1502,45 @@
             }
         }
         
+        // Calculate task progress
+        function calculateTaskProgress(task) {
+            if (!task.startDate || !task.dueDate) {
+                return { percent: 0, status: 'normal' };
+            }
+            
+            const now = new Date();
+            const start = new Date(task.startDate);
+            const due = new Date(task.dueDate);
+            
+            // If the task is completed, return 100%
+            if (task.status === 'completed') {
+                return { percent: 100, status: 'success' };
+            }
+            
+            // If the task is overdue, return 100% with danger status
+            if (now > due) {
+                return { percent: 100, status: 'danger' };
+            }
+            
+            // Calculate what percentage of the time has passed
+            const totalDuration = due - start;
+            const elapsedDuration = now - start;
+            let percent = Math.floor((elapsedDuration / totalDuration) * 100);
+            
+            // Clamp between 0 and 100
+            percent = Math.max(0, Math.min(100, percent));
+            
+            // Determine status based on percentage
+            let status = 'normal';
+            if (percent > 75) {
+                status = 'danger';
+            } else if (percent > 50) {
+                status = 'warning';
+            }
+            
+            return { percent, status };
+        }
+        
         // Create task card element
         function createTaskCard(task) {
             const taskCard = document.createElement('div');
@@ -1340,14 +1564,46 @@
                     break;
             }
             
-            // Format date
-            const date = new Date(task.createdAt);
-            const formattedDate = date.toLocaleDateString('en-US', {
+            // Format dates
+            const createdDate = new Date(task.createdAt);
+            const formattedCreatedDate = createdDate.toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
                 year: 'numeric'
             });
             
+            // Calculate days remaining or overdue
+            let dueDateText = '';
+            let dueDateClass = '';
+            
+            if (task.dueDate) {
+                const dueDate = new Date(task.dueDate);
+                const now = new Date();
+                const timeDiff = dueDate - now;
+                const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                
+                if (daysDiff < 0) {
+                    dueDateText = `${Math.abs(daysDiff)} day${Math.abs(daysDiff) !== 1 ? 's' : ''} overdue`;
+                    dueDateClass = 'date-danger';
+                } else if (daysDiff === 0) {
+                    dueDateText = 'Due today';
+                    dueDateClass = 'date-warning';
+                } else if (daysDiff === 1) {
+                    dueDateText = 'Due tomorrow';
+                    dueDateClass = 'date-warning';
+                } else if (daysDiff <= 3) {
+                    dueDateText = `Due in ${daysDiff} days`;
+                    dueDateClass = 'date-warning';
+                } else {
+                    dueDateText = `Due in ${daysDiff} days`;
+                    dueDateClass = '';
+                }
+            }
+            
+            // Calculate progress
+            const progress = calculateTaskProgress(task);
+            
+            // Build the task card HTML
             taskCard.innerHTML = `
                 <div class="task-status ${statusClass}">${statusIcon}</div>
                 <h3 class="task-title">${escapeHtml(task.title)}</h3>
@@ -1357,9 +1613,20 @@
                         <i class="fas fa-user-circle"></i> ${escapeHtml(task.assignee)}
                     </div>
                     <div>
-                        <i class="far fa-calendar-alt"></i> ${formattedDate}
+                        <i class="far fa-calendar-alt"></i> ${formattedCreatedDate}
                     </div>
                 </div>
+                ${task.startDate && task.dueDate ? `
+                    <div class="task-dates">
+                        <div class="task-due-date ${dueDateClass}">
+                            <i class="fas fa-hourglass-half"></i>
+                            ${dueDateText}
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar ${progress.status}" style="width: ${progress.percent}%"></div>
+                        </div>
+                    </div>
+                ` : ''}
                 <div class="task-actions">
                     <button class="btn-edit edit-task" data-id="${task.id}" title="Edit Task">
                         <i class="fas fa-edit"></i>
@@ -1372,13 +1639,14 @@
             
             // Add event listeners
             taskCard.querySelector('.edit-task').addEventListener('click', () => openEditTaskModal(task.id));
-            taskCard.querySelector('.delete-task').addEventListener('click', () => deleteTask(task.id));
+            taskCard.querySelector('.delete-task').addEventListener('click', () => confirmDelete(task.id));
             
             return taskCard;
         }
         
         // Escape HTML to prevent XSS
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
@@ -1389,6 +1657,7 @@
             modalTitle.textContent = 'Add New Task';
             taskForm.reset();
             taskIdInput.value = '';
+            setDefaultDates();
             taskModal.style.display = 'flex';
         }
         
@@ -1404,12 +1673,72 @@
             document.getElementById('taskStatus').value = task.status;
             document.getElementById('taskAssignee').value = task.assignee;
             
+            // Set date values if they exist
+            if (task.startDate) {
+                document.getElementById('startDate').value = task.startDate;
+            }
+            if (task.dueDate) {
+                document.getElementById('dueDate').value = task.dueDate;
+            }
+            
             taskModal.style.display = 'flex';
         }
         
         // Close task modal
         function closeTaskModal() {
             taskModal.style.display = 'none';
+        }
+        
+        // Confirm task deletion
+        function confirmDelete(taskId) {
+            taskToDelete = taskId;
+            confirmDeleteModal.style.display = 'flex';
+        }
+        
+        // Close confirm delete modal
+        function closeConfirmDeleteModal() {
+            confirmDeleteModal.style.display = 'none';
+            taskToDelete = null;
+        }
+        
+        // Proceed with deletion after confirmation
+        async function proceedWithDelete() {
+            if (!taskToDelete) {
+                closeConfirmDeleteModal();
+                return;
+            }
+            
+            showLoading(true);
+            
+            // Set delete flag to ensure proper sync
+            isDeleting = true;
+            
+            // Remove the task from the array
+            tasks = tasks.filter(t => t.id !== taskToDelete);
+            
+            // Save to localStorage immediately
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // Try to sync with GitHub
+            try {
+                if (localStorage.getItem('gh_owner') && localStorage.getItem('gh_repo') && localStorage.getItem(ghTokenKey)) {
+                    await saveTasksToGitHub();
+                }
+            } catch (error) {
+                console.error('Error saving to GitHub:', error);
+                showNotification('Task deleted locally but GitHub sync failed. Will try again later.', 'error');
+            } finally {
+                showLoading(false);
+            }
+            
+            // Close the modal and render tasks
+            closeConfirmDeleteModal();
+            renderTasks();
+            showNotification('Task deleted successfully!', 'success');
+            
+            // Reset variables
+            taskToDelete = null;
+            isDeleting = false;
         }
         
         // Save task
@@ -1421,6 +1750,14 @@
             const description = document.getElementById('taskDescription').value;
             const status = document.getElementById('taskStatus').value;
             const assignee = document.getElementById('taskAssignee').value;
+            const startDate = document.getElementById('startDate').value;
+            const dueDate = document.getElementById('dueDate').value;
+            
+            // Validate dates
+            if (new Date(dueDate) < new Date(startDate)) {
+                showNotification('Due date must be after start date', 'error');
+                return;
+            }
             
             showLoading(true);
             
@@ -1434,6 +1771,8 @@
                         description,
                         status,
                         assignee,
+                        startDate,
+                        dueDate,
                         updatedAt: new Date().toISOString()
                     };
                 }
@@ -1445,6 +1784,8 @@
                     description,
                     status,
                     assignee,
+                    startDate,
+                    dueDate,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
@@ -1469,40 +1810,10 @@
             // Close modal and render tasks
             closeTaskModal();
             renderTasks();
-            showNotification('Task saved successfully!', 'success');
-        }
-        
-        // Delete task
-        async function deleteTask(taskId) {
-            if (!confirm('Are you sure you want to delete this task?')) {
-                return;
-            }
             
-            showLoading(true);
-            
-            // Set delete flag to ensure proper sync
-            isDeleting = true;
-            
-            // Remove the task from the array
-            tasks = tasks.filter(t => t.id !== taskId);
-            
-            // Save to localStorage
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            
-            // Try to sync with GitHub
-            try {
-                if (localStorage.getItem('gh_owner') && localStorage.getItem('gh_repo') && localStorage.getItem(ghTokenKey)) {
-                    await saveTasksToGitHub();
-                }
-            } catch (error) {
-                console.error('Error saving to GitHub:', error);
-                showNotification('Task deleted locally but GitHub sync failed. Will try again later.', 'error');
-            } finally {
-                showLoading(false);
-            }
-            
-            renderTasks();
-            showNotification('Task deleted successfully!', 'success');
+            // Show success notification
+            const actionText = taskId ? 'updated' : 'created';
+            showNotification(`Task ${actionText} successfully!`, 'success');
         }
         
         // Filter tasks based on search input
@@ -1515,7 +1826,9 @@
             // Remove any existing notifications
             const existingNotifications = document.querySelectorAll('.notification');
             existingNotifications.forEach(notification => {
-                document.body.removeChild(notification);
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
             });
             
             // Create notification element
@@ -1536,7 +1849,9 @@
             
             // Add close button listener
             notification.querySelector('.notification-close').addEventListener('click', () => {
-                document.body.removeChild(notification);
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
             });
             
             // Remove after 5 seconds
@@ -1550,6 +1865,17 @@
         // Show/hide loading spinner
         function showLoading(show) {
             loadingSpinner.style.display = show ? 'flex' : 'none';
+        }
+        
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
         }
         
         // Initialize the app
