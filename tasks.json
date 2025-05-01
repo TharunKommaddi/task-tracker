@@ -45,15 +45,6 @@
     "updatedAt": "2025-05-01T06:20:21.314Z"
   },
   {
-    "id": "1746080279777",
-    "title": "Test2",
-    "description": "hi",
-    "status": "in-progress",
-    "assignee": "Tharun Kommaddi",
-    "createdAt": "2025-05-01T06:17:59.777Z",
-    "updatedAt": "2025-05-01T06:17:59.777Z"
-  },
-  {
     "id": "1746080513605",
     "title": "Wait",
     "description": "Wait",
