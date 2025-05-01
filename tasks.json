@@ -3,12 +3,12 @@
     "id": "1746108163597",
     "title": "Task 1",
     "description": "Aaa",
-    "status": "not-started",
+    "status": "completed",
     "assignee": "Jomy Joseph",
     "startDate": "2025-05-01",
     "dueDate": "2025-05-08",
     "createdAt": "2025-05-01T14:02:43.597Z",
-    "updatedAt": "2025-05-01T14:06:10.328Z"
+    "updatedAt": "2025-05-01T14:07:38.674Z"
   },
   {
     "id": "1746108350602",
