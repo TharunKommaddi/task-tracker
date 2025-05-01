@@ -34,14 +34,5 @@
     "assignee": "Tharun Kommaddi",
     "createdAt": "2025-04-23T09:43:42.338Z",
     "updatedAt": "2025-04-30T21:55:48.228Z"
-  },
-  {
-    "id": "1746080279777",
-    "title": "Test2",
-    "description": "hi",
-    "status": "in-progress",
-    "assignee": "Tharun Kommaddi",
-    "createdAt": "2025-05-01T06:17:59.777Z",
-    "updatedAt": "2025-05-01T06:17:59.777Z"
   }
 ]
