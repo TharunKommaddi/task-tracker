@@ -1,16 +1,5 @@
 [
   {
-    "id": "1746108653662",
-    "title": "task 1",
-    "description": "aaa",
-    "status": "completed",
-    "assignee": "Tharun Kommaddi",
-    "startDate": "2025-05-01",
-    "dueDate": "2025-05-08",
-    "createdAt": "2025-05-01T14:10:53.662Z",
-    "updatedAt": "2025-05-01T14:15:30.513Z"
-  },
-  {
     "id": "1746108718553",
     "title": "task 2",
     "description": "bbbbb",
