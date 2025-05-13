@@ -42,16 +42,5 @@
     "dueDate": "2025-05-14",
     "createdAt": "2025-05-10T11:55:44.968Z",
     "updatedAt": "2025-05-13T15:48:52.909Z"
-  },
-  {
-    "id": "1746204432149",
-    "title": "Health insurance ",
-    "description": "Can you check which hospital it covered in Kerala \n\nWill be done by this week",
-    "status": "in-progress",
-    "assignee": "Tharun Kommaddi",
-    "startDate": "2025-05-05",
-    "dueDate": "2025-05-09",
-    "createdAt": "2025-05-02T16:47:12.149Z",
-    "updatedAt": "2025-05-05T03:11:31.146Z"
   }
 ]
