@@ -53,16 +53,5 @@
     "dueDate": "2025-05-05",
     "createdAt": "2025-05-02T19:01:34.301Z",
     "updatedAt": "2025-05-03T22:09:24.134Z"
-  },
-  {
-    "id": "1746878144968",
-    "title": "Anerkennung ",
-    "description": "~ Anakha\n~ Anatt\n~ Mariya Avarachan ",
-    "status": "not-started",
-    "assignee": "Tharun Kommaddi",
-    "startDate": "2025-05-13",
-    "dueDate": "2025-05-14",
-    "createdAt": "2025-05-10T11:55:44.968Z",
-    "updatedAt": "2025-05-13T15:48:52.909Z"
   }
 ]
