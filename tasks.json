@@ -1,15 +1,5 @@
 [
-  {
-    "id": "1746212393420",
-    "title": "Room decoration ",
-    "description": "Bro Sandra is coming I need to decorate my room. With led lights and frames \n\nShe is coming this month 25 to here",
-    "status": "in-progress",
-    "assignee": "Tharun Kommaddi",
-    "startDate": "2025-05-10",
-    "dueDate": "2025-05-24",
-    "createdAt": "2025-05-02T18:59:53.420Z",
-    "updatedAt": "2025-05-10T11:36:05.670Z"
-  },
+  
   {
     "id": "1746250606221",
     "title": "A2 curriculum",
@@ -20,49 +10,6 @@
     "dueDate": "2025-05-30",
     "createdAt": "2025-05-03T05:36:46.221Z",
     "updatedAt": "2025-05-03T22:11:44.967Z"
-  },
-  {
-    "id": "1746274093912",
-    "title": "YouTube Seo Expert ",
-    "description": "I need YouTube seo expert to enhance my YouTube videos reach organically.\n",
-    "status": "not-started",
-    "assignee": "Tharun Kommaddi",
-    "startDate": "2025-05-10",
-    "dueDate": "2025-05-21",
-    "createdAt": "2025-05-03T12:08:13.912Z",
-    "updatedAt": "2025-05-10T11:33:07.978Z"
-  },
-  {
-    "id": "1746204432149",
-    "title": "Health insurance ",
-    "description": "Can you check which hospital it covered in Kerala \n\nWill be done by this week",
-    "status": "in-progress",
-    "assignee": "Tharun Kommaddi",
-    "startDate": "2025-05-05",
-    "dueDate": "2025-05-09",
-    "createdAt": "2025-05-02T16:47:12.149Z",
-    "updatedAt": "2025-05-05T03:11:31.146Z"
-  },
-  {
-    "id": "1746212494301",
-    "title": "Visa office remainder",
-    "description": "About appointment and my visa is expired \n\n\nPlease check the attached email - will do translation after you say it is good \n\nSubject: URGENT: Expired Residence Permit - Jomy Joseph \n\nDear Ms. Kroll,\n\nI submitted all requested documents for my job-seeker permit. My current permit expired April 30, 2025. I have not received any response.\n\nPlease advise on my application status urgently.\n\nThank you,\nJomy Joseph\n+49 1573 9866872\n\n\n",
-    "status": "in-progress",
-    "assignee": "Tharun Kommaddi",
-    "startDate": "2025-05-03",
-    "dueDate": "2025-05-05",
-    "createdAt": "2025-05-02T19:01:34.301Z",
-    "updatedAt": "2025-05-03T22:09:24.134Z"
-  },
-  {
-    "id": "1746199151488",
-    "title": "Studio setup ",
-    "description": "Purchase studio setup items ",
-    "status": "not-started",
-    "assignee": "Tharun Kommaddi",
-    "startDate": "2025-05-02",
-    "dueDate": "2025-05-12",
-    "createdAt": "2025-05-02T15:19:11.488Z",
-    "updatedAt": "2025-05-02T15:20:32.780Z"
   }
+
 ]
